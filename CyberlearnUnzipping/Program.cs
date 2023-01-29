@@ -10,7 +10,7 @@ namespace CyberlearnUnzipping
         static void Main(string[] args)
         {
             string startPath = @"C:\Users\antoine.widmer\Downloads\Module 634-1-ExamenModuleJanvier2023-1952378";
-            string toPath = @"C:\git\unzipped";
+            string toPath = @"C:\git\unzipped2";
 
             var dirs = Directory.GetDirectories(startPath);
             foreach(string dir in dirs)
@@ -18,11 +18,15 @@ namespace CyberlearnUnzipping
                 string folder = dir.Substring(0, dir.LastIndexOf(("\\")));
 
                 var fileName = dir.Substring(dir.LastIndexOf(("\\")) + 1);
-
+                
                 var names = fileName.Split(" ");
-                var firstname = names[1];
-                var firstnames = names[1].Split("_");
-                var lastname = names[0];
+                var namesCount = names.Length;
+                //var firstname = names[namesCount-1];
+                var firstnames = names[namesCount - 1].Split("_");
+                var lastname = "";
+                for (int i = 0; i< namesCount - 1; i++){
+                    lastname = lastname + " " + names[i];
+                }
                 var filenameOut = lastname + "_" +firstnames[0];
                 var files = Directory.GetFiles(dir);
 
@@ -36,7 +40,7 @@ namespace CyberlearnUnzipping
                     }
 
                     else
-                        Console.WriteLine(firstname + " " + lastname);
+                        Console.WriteLine(firstnames[0] + " " + lastname);
                 }
                 
                 
