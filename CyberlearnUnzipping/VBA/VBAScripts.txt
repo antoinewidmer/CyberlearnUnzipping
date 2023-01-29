@@ -1,0 +1,207 @@
+﻿Sub GetSubdir()
+'
+' getStudents Macro
+'
+Dim path As String
+Dim subdir As String
+Dim subdirectories() As String
+Dim i As Integer
+    Dim currentRow As Integer
+    Dim ws As Worksheet
+    Dim FullNames() As String
+
+    ' Set the path to the directory you want to search in
+    path = "C:\git\unzipped2\"
+
+    ' Get the first subdirectory
+    subdir = Dir(path, vbDirectory)
+    Set ws = ThisWorkbook.Sheets("Sheet1")
+
+    ' Loop through all subdirectories
+    currentRow = 2
+    Do While subdir <> ""
+        If subdir = "." Or subdir = ".." Then
+        
+            subdir = Dir()
+        
+        Else
+            FullNames = Split(subdir, "_")
+            ws.Cells(currentRow, 2).Value = FullNames(0)
+            ws.Cells(currentRow, 3).Value = FullNames(1)
+
+            ' Get the next subdirectory
+            subdir = Dir()
+
+            ' Increment the current row
+            currentRow = currentRow + 1
+        End If
+    Loop
+
+End Sub
+
+
+Sub addStudentSheet()
+'
+' addStudentSheet Macro
+'
+
+'
+For i = 2 To 24
+    Sheets.Add After:=ActiveSheet
+    Sheets(i).Name = Sheets(1).Cells(i, 2) & " " & Sheets(1).Cells(i, 3)
+    ActiveCell.FormulaR1C1 = "Etudiant"
+    Range("D1").Select
+    ActiveCell.FormulaR1C1 = "note"
+    Range("B5").Select
+    ActiveCell.FormulaR1C1 = "total"
+    Range("C5").Select
+    ActiveCell.FormulaR1C1 = "your points"
+    Range("B1").Select
+    ActiveCell.Value = Sheets(1).Cells(i, 2) & " " & Sheets(1).Cells(i, 3)
+    Range("A6").Select
+    ActiveCell.FormulaR1C1 = "=Sheet1!R[24]C[1]"
+    Range("A7").Select
+    Columns("A:A").ColumnWidth = 16.71
+    Range("A7").Select
+    ActiveCell.FormulaR1C1 = ""
+    Range("A7").Select
+    ActiveCell.FormulaR1C1 = "=Sheet1!R[24]C[1]"
+    'colonne description
+    Range("A6:A7").Select
+    Selection.AutoFill Destination:=Range("A6:A17"), Type:=xlFillDefault
+    Range("A6:A28").Select
+    Columns("A:A").ColumnWidth = 18.71
+    
+    Range("A6").Select
+    Selection.AutoFill Destination:=Range("A6:B6"), Type:=xlFillDefault
+    'colonne total point
+    Range("B6").Select
+    Selection.AutoFill Destination:=Range("B6:B17"), Type:=xlFillDefault
+    
+     Range("C6").Select
+    ActiveCell.FormulaR1C1 = "=SUM(R[1]C:R[4]C)"
+    Range("C11").Select
+    ActiveCell.FormulaR1C1 = "=SUM(R[1]C:R[6]C)"
+    Range("C18").Select
+    ActiveCell.FormulaR1C1 = "=R[-7]C+R[-12]C"
+    Range("E1").Select
+    ActiveCell.FormulaR1C1 = "=R[17]C[-2]/10+1"
+    Range("E2").Select
+    
+    Range("A10").Select
+    ActiveCell.FormulaR1C1 = ""
+    Range("B10").Select
+    ActiveCell.FormulaR1C1 = ""
+Next i
+
+End Sub
+
+Sub getStudents()
+'
+' getStudents Macro
+'
+
+For i = 2 To 24
+    Worksheets("Sheet1").Cells(2 + i - 2, 1).Value = Worksheets(i).Cells(1, 3).Value
+    Worksheets("Sheet1").Cells(2 + i - 2, 2).Value = Worksheets(i).Cells(1, 2).Value
+    Worksheets("Sheet1").Cells(2 + i - 2, 3).Value = Worksheets(i).Cells(2, 2).Value
+    Worksheets("Sheet1").Cells(2 + i - 2, 4).Value = Worksheets(i).Cells(1, 5).Value
+    
+Next i
+sortStudent
+
+End Sub
+Sub sortStudent()
+'
+' sortStudent Macro
+'
+
+'
+    Range("A2:D24").Select
+    ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Add Key:=Range("B2:B24") _
+        , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("Sheet1").Sort
+        .SetRange Range("A2:D24")
+        .Header = xlGuess
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+   
+End Sub
+
+
+
+Sub create_and_email_pdf()
+' Author - Philip Treacy  ::   https://www.linkedin.com/in/philiptreacy
+' https://www.MyOnlineTrainingHub.com/vba-to-create-pdf-from-excel-worksheet-then-email-it-with-outlook
+' Date - 14 Oct 2013
+' Create a PDF from the current sheet and email it as an attachment through Outlook
+ 
+Dim EmailSubject As String, EmailSignature As String
+Dim CurrentMonth As String, DestFolder As String, PDFFile As String
+Dim Email_To As String, Email_CC As String, Email_BCC As String
+Dim OpenPDFAfterCreating As Boolean, AlwaysOverwritePDF As Boolean, DisplayEmail As Boolean
+Dim OverwritePDF As VbMsgBoxResult
+Dim OutlookApp As Object, OutlookMail As Object
+CurrentMonth = ""
+ 
+' *****************************************************
+' *****     You Can Change These Variables    *********
+ 
+    EmailSubject = "Projet JavaSocket"   'Change this to change the subject of the email. The current month is added to end of subj line
+    OpenPDFAfterCreating = False    'Change this if you want to open the PDF after creating it : TRUE or FALSE
+    AlwaysOverwritePDF = False      'Change this if you always want to overwrite a PDF that already exists :TRUE or FALSE
+    DisplayEmail = True 'Change this if you don't want to display the email before sending.  Note, you must have a TO email address specified for this to work
+    Email_To = ""   'Change this if you want to specify To email e.g. ActiveSheet.Range("H1") to get email from cell H1
+    Email_CC = ""
+    Email_BCC = "widmera@gmail.com"
+    
+            
+' ******************************************************
+     
+For i = 2 To 12
+    Sheets(i).Select
+    Range("A1:F34").Select
+    PDFFile = "D:\CloudDocuments\SwitchDrive\HES-SO\Filiere\cours\2018\Spring\633-2-JavaSocket\Note\Projet " + Worksheets(i).Cells(1, 2).Value + ".pdf"
+    ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:= _
+        PDFFile, _
+        Quality:=xlQualityStandard, IncludeDocProperties:=True, IgnorePrintAreas _
+        :=False, OpenAfterPublish:=False
+
+    Message = "Hello " + vbCrLf + vbCrLf '+ Worksheets(i).Cells(1, 2).Value + "," + vbCrLf + vbCrLf
+    Message = Message + "Voici l'évaluation de ton projet Java Socket" + vbCrLf + vbCrLf
+    Message = Message + "Meilleures salutations" + vbCrLf + vbCrLf
+    Message = Message + "Antoine Widmer" + vbCrLf + vbCrLf
+    
+    Email_To = Worksheets(1).Cells(i, 5).Value
+    
+    'Create an Outlook object and new mail message
+    Set OutlookApp = CreateObject("Outlook.Application")
+    Set OutlookMail = OutlookApp.CreateItem(0)
+         
+    'Display email and specify To, Subject, etc
+    With OutlookMail
+         
+        .Display
+        .To = Email_To
+        .CC = Email_CC
+        .BCC = Email_BCC
+        .Subject = EmailSubject
+        .Body = Message
+        
+        .Attachments.Add PDFFile
+                 
+        If DisplayEmail = False Then
+             
+            .Send
+             
+        End If
+         
+    End With
+Next i
+  
+End Sub
+
