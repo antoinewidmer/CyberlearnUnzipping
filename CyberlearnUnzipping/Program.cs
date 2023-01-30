@@ -9,8 +9,8 @@ namespace CyberlearnUnzipping
     {
         static void Main(string[] args)
         {
-            string startPath = @"C:\Users\antoine.widmer\Downloads\Module 634-1-ExamenModuleJanvier2023-1952378";
-            string toPath = @"C:\git\unzipped2";
+            string startPath = @"C:\zipped";
+            string toPath = @"C:\unzipped";
 
             var dirs = Directory.GetDirectories(startPath);
             foreach(string dir in dirs)
